@@ -46,14 +46,14 @@ def helpMessage() {
 /*
  * SET UP CONFIGURATION VARIABLES
  */
-params.reads_folder = "data/reads"
+params.reads_folder = "s3://lifebit-featured-datasets/containers/plass"
 params.reads_extension = "fastq"
 reads_path="${params.reads_folder}/*{1,2}.${params.reads_extension}"
 
-params.fas = 'data/DB.fasta'
+params.fas = "s3://lifebit-featured-datasets/containers/mmseqs2/DB.fasta"
 fas = file(params.fas)
 
-params.uniprot = "data/uniprot_sprot.dat.gz"
+params.uniprot = "s3://lifebit-featured-datasets/pipelines/onemetagenome-data/uniprot_sprot.dat.gz"
 uniprot = file(params.uniprot)
 
 params.taxdump = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
@@ -156,7 +156,7 @@ if (params.help){
       sed -i 's|UniRef100_||g' targetDB.lookup
 
       # Generate annotation mapping DB (target DB IDs to NCBI taxa, line type OX)
-      mmseqs convertkb uniprot_sprot.dat.gz targetDB.mapping --kb-columns OX --mapping-file targetDB.lookup
+      mmseqs convertkb $uniprot targetDB.mapping --kb-columns OX --mapping-file targetDB.lookup
       # Reformat targetDB.mapping_OX DB into tsv file
       mmseqs prefixid targetDB.mapping_OX targetDB.mapping_OX_pref
       tr -d '\\000' < targetDB.mapping_OX_pref > targetDB.tsv_tmp
@@ -164,7 +164,6 @@ if (params.help){
       # Cleanup: taxon format:  "NCBI_TaxID=418404 {ECO:0000313|EMBL:AHX25609.1};"
       # Only the numerical identifier "418404" is required.
       awk '{match(\$2, /=([^ ;]+)/, a); print \$1"\t"a[1]; }' targetDB.tsv_tmp > targetDB.tsv
-      #awk '{match(\$2, /=([^ ;]+)/, a); print \$1"\t"a[1]; }' targetDB.tsv_tmp > targetDB.tsv
       """
   }
 
