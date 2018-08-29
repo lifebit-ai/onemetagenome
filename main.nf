@@ -59,6 +59,8 @@ uniprot = file(params.uniprot)
 params.taxdump = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
 taxdump = file(params.taxdump)
 
+outdir = "$baseDir/${params.outdir}"
+
 // Show help emssage
 if (params.help){
     helpMessage()
@@ -79,7 +81,7 @@ if (params.help){
  process plass {
      container 'soedinglab/plass:latest'
 
-     publishDir "${params.outdir}", mode: 'copy'
+     publishDir "${outdir}", mode: 'copy'
 
      input:
      set val(name), file(reads) from reads
@@ -98,7 +100,7 @@ if (params.help){
   */
  process convertdb_query {
      container 'soedinglab/mmseqs2:latest'
-     publishDir "${params.outdir}/createdb/query", mode: 'copy'
+     publishDir "${outdir}/createdb/query", mode: 'copy'
 
      input:
      //file assemblyfas from fas
@@ -118,7 +120,7 @@ if (params.help){
   */
  process convertdb_target {
      container 'soedinglab/mmseqs2:latest'
-     publishDir "${params.outdir}/createdb/target", mode: 'copy'
+     publishDir "${outdir}/createdb/target", mode: 'copy'
 
      input:
      file fas
@@ -137,7 +139,7 @@ if (params.help){
   */
   process pre_taxonomy {
       container 'soedinglab/mmseqs2:latest'
-      publishDir "${params.outdir}/taxonomy/pre_taxonomy", mode: 'copy'
+      publishDir "${outdir}/taxonomy/pre_taxonomy", mode: 'copy'
 
       input:
       file uniprot
@@ -172,7 +174,7 @@ if (params.help){
    */
   process taxonomy {
       container 'soedinglab/mmseqs2:latest'
-      publishDir "${params.outdir}/taxonomy", mode: 'copy'
+      publishDir "${outdir}/taxonomy", mode: 'copy'
 
       input:
       file "*" from queryDB
