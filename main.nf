@@ -105,7 +105,7 @@ log.info "========================================="
  process plass {
      container 'soedinglab/plass:latest'
 
-     publishDir "${outdir}", mode: 'copy'
+     publishDir "${outdir}/tmp/plass", mode: 'copy'
 
      input:
      set val(name), file(reads) from reads
@@ -125,7 +125,7 @@ log.info "========================================="
   */
  process convertdb_query {
      container 'soedinglab/mmseqs2:latest'
-     publishDir "${outdir}/createdb/query", mode: 'copy'
+     publishDir "${outdir}/tmp/createdb/query", mode: 'copy'
 
      input:
      //file assemblyfas from fas
@@ -145,7 +145,7 @@ log.info "========================================="
   */
  process convertdb_target {
      container 'soedinglab/mmseqs2:latest'
-     publishDir "${outdir}/createdb/target", mode: 'copy'
+     publishDir "${outdir}/tmp/createdb/target", mode: 'copy'
 
      input:
      file fas
@@ -160,11 +160,11 @@ log.info "========================================="
  }
 
  /*
-  * STEP 4 - using uniprot data to generate targetDB.tsv for taxonomy (STEP 5)
+  * STEP 4 - Using uniprot data to generate targetDB.tsv for taxonomy (STEP 5)
   */
   process pre_taxonomy {
       container 'soedinglab/mmseqs2:latest'
-      publishDir "${outdir}/taxonomy/pre_taxonomy", mode: 'copy'
+      publishDir "${outdir}/tmp/taxonomy/pre_taxonomy", mode: 'copy'
 
       input:
       file uniprot
@@ -199,7 +199,7 @@ log.info "========================================="
    */
   process taxonomy {
       container 'soedinglab/mmseqs2:latest'
-      publishDir "${outdir}/taxonomy", mode: 'copy'
+      publishDir "${outdir}/tmp/taxonomy", mode: 'copy'
 
       input:
       file "*" from queryDB
@@ -220,4 +220,26 @@ log.info "========================================="
       rm -rf tmp
       mmseqs createtsv queryDB queryLcaDB queryLca.tsv
       """
+  }
+
+  /*
+   * STEP 6 - Generating a HTML5 Krona chart from the first two columns of queryLca.tsv
+   */
+  process chart {
+     container 'stevetsa/krona:latest'
+     publishDir "${outdir}", mode: 'copy'
+
+     input:
+     file "queryLca.tsv" from analysis
+
+     output:
+     file "taxonomy.krona.html"
+
+     script:
+     """
+     awk '{print \$1,"\\t",\$2}' queryLca.tsv > krona_queryLca.tsv
+     /KronaTools-2.7/updateTaxonomy.sh
+     ktImportTaxonomy krona_queryLca.tsv
+     """
+
   }
