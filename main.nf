@@ -59,7 +59,8 @@ uniprot = file(params.uniprot)
 params.taxdump = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
 taxdump = file(params.taxdump)
 
-outdir = "$baseDir/${params.outdir}"
+params.outdir = "$baseDir/${params.outdir}"
+outdir = params.outdir
 
 // Show help emssage
 if (params.help){
@@ -74,6 +75,29 @@ if (params.help){
          .fromFilePairs( reads_path, size: 2 )
          .ifEmpty { exit 1, "Cannot find any reads matching: ${reads_path}\nNB: Please specify the folder and extension of the read files\nEg: --reads_folder reads --reads_extension fastq"}
          .set { reads }
+
+
+// Header log info
+log.info """=======================================================
+                                         ,--./,-.
+         ___     __   __   __   ___     /,-._.--~\'
+   |\\ | |__  __ /  ` /  \\ |__) |__         }  {
+   | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
+                                         `._,._,\'
+
+PhilPalmer/onemetagenome
+======================================================="""
+def summary = [:]
+summary['Pipeline Name']    = 'PhilPalmer/onemetagenome'
+//summary['Reads folder']     = params.reads_folder
+//summary['Reads extension']  = params.reads_extension
+summary['Reads']            = reads_path
+summary['Fasta database']   = params.fas
+summary['Uniprot database'] = params.uniprot
+summary['Taxdump']          = params.taxdump
+summary['Output directory'] = params.outdir
+log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
+log.info "========================================="
 
  /*
   * STEP 1 - Plass - assemle reads
