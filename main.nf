@@ -60,7 +60,7 @@ params.taxdump = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
 taxdump = file(params.taxdump)
 
 params.outdir = "results"
-outdir = "$baseDir/${params.outdir}"
+outdir = "${params.outdir}"
 
 // Show help emssage
 if (params.help){
@@ -116,6 +116,7 @@ log.info "========================================="
      script:
      """
      plass assemble $reads assembly.fas tmp
+     rm -rf tmp
      """
  }
 
@@ -216,6 +217,7 @@ log.info "========================================="
       tar xzvf taxdump.tar.gz
       cd ..
       mmseqs taxonomy queryDB targetDB targetDB.tsv ncbi-taxdump queryLcaDB tmp
+      rm -rf tmp
       mmseqs createtsv queryDB queryLcaDB queryLca.tsv
       """
   }
