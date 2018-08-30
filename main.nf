@@ -59,8 +59,8 @@ uniprot = file(params.uniprot)
 params.taxdump = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
 taxdump = file(params.taxdump)
 
-params.outdir = "$baseDir/${params.outdir}"
-outdir = params.outdir
+params.outdir = "results"
+outdir = "$baseDir/${params.outdir}"
 
 // Show help emssage
 if (params.help){
