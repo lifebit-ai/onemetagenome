@@ -208,7 +208,7 @@ log.info "========================================="
       file taxdump from taxdump
 
       output:
-      file "queryLca.tsv" into analysis
+      file "queryLca.tsv" into analysis, analysis2
 
       script:
       """
@@ -240,6 +240,28 @@ log.info "========================================="
      awk '{print \$1,"\\t",\$2}' queryLca.tsv > krona_queryLca.tsv
      /KronaTools-2.7/updateTaxonomy.sh
      ktImportTaxonomy krona_queryLca.tsv
+     """
+
+  }
+
+  /*
+   * STEP 7 - Generating a phylogenetic tree using the R package taxize
+   */
+  process phylotree {
+     container 'lifebitai/onemetagenome_phylotree:latest'
+     publishDir "${outdir}", mode: 'copy'
+
+     input:
+     file "queryLca.tsv" from analysis2
+
+     output:
+     file "phylotree.pdf"
+     //file "Rplots.png"
+
+     script:
+     """
+     echo "ENTREZ_KEY='01f380df4cbfe85683d3ce7d1716648b3d09'" > .Renviron
+     Rscript /data/rscripts/docker_onemetagenome_phylotree.r
      """
 
   }
