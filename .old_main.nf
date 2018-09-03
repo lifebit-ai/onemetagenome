@@ -99,9 +99,29 @@ summary['Output directory'] = params.outdir
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
+ /*
+  * STEP 1 - Plass - assemle reads
+  */
+ process plass {
+     container 'soedinglab/plass:latest'
+
+     publishDir "${outdir}/tmp/plass", mode: 'copy'
+
+     input:
+     set val(name), file(reads) from reads
+
+     output:
+     file "assembly.fas" into assembly
+
+     script:
+     """
+     plass assemble $reads assembly.fas tmp
+     rm -rf tmp
+     """
+ }
 
  /*
-  * STEP 1 - Convert query database into mmseqs database format
+  * STEP 2 - Convert query database into mmseqs database format
   */
  process convertdb_query {
      container 'soedinglab/mmseqs2:latest'
@@ -109,20 +129,19 @@ log.info "========================================="
 
      input:
      //file assemblyfas from fas
-     //file "assembly.fas" from assembly
-     set val(name), file(reads) from reads
+     file "assembly.fas" from assembly
 
      output:
      file "queryDB*" into queryDB
 
      script:
      """
-     mmseqs createdb $reads queryDB
+     mmseqs createdb "assembly.fas" queryDB
      """
  }
 
  /*
-  * STEP 2 - Convert target database into mmseqs database format
+  * STEP 3 - Convert target database into mmseqs database format
   */
  process convertdb_target {
      container 'soedinglab/mmseqs2:latest'
@@ -141,7 +160,7 @@ log.info "========================================="
  }
 
  /*
-  * STEP 3 - Using uniprot data to generate targetDB.tsv for taxonomy (STEP 5)
+  * STEP 4 - Using uniprot data to generate targetDB.tsv for taxonomy (STEP 5)
   */
   process pre_taxonomy {
       container 'soedinglab/mmseqs2:latest'
@@ -176,7 +195,7 @@ log.info "========================================="
   }
 
   /*
-   * STEP 4 - Executing the taxonomy classification
+   * STEP 5 - Executing the taxonomy classification
    */
   process taxonomy {
       container 'soedinglab/mmseqs2:latest'
@@ -204,7 +223,7 @@ log.info "========================================="
   }
 
   /*
-   * STEP 5 - Generating a HTML5 Krona chart from the first two columns of queryLca.tsv
+   * STEP 6 - Generating a HTML5 Krona chart from the first two columns of queryLca.tsv
    */
   process chart {
      container 'stevetsa/krona:latest'
@@ -226,7 +245,7 @@ log.info "========================================="
   }
 
   /*
-   * STEP 6 - Generating a phylogenetic tree using the R package taxize
+   * STEP 7 - Generating a phylogenetic tree using the R package taxize
    */
   process phylotree {
      container 'lifebitai/onemetagenome_phylotree:latest'
