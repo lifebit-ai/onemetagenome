@@ -108,7 +108,6 @@ log.info "========================================="
      publishDir "${outdir}/tmp/createdb/query", mode: 'copy'
 
      input:
-     //file assemblyfas from fas
      //file "assembly.fas" from assembly
      set val(name), file(reads) from reads
 
@@ -189,7 +188,7 @@ log.info "========================================="
       file taxdump from taxdump
 
       output:
-      file "queryLca.tsv" into analysis, analysis2
+      set file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis, analysis2
 
       script:
       """
@@ -198,6 +197,7 @@ log.info "========================================="
       tar xzvf taxdump.tar.gz
       cd ..
       mmseqs taxonomy queryDB targetDB targetDB.tsv ncbi-taxdump queryLcaDB tmp
+      mmseqs convertalis queryDB targetDB tmp/latest/2b_ali queryLcaProt.tsv
       rm -rf tmp
       mmseqs createtsv queryDB queryLcaDB queryLca.tsv
       """
@@ -211,7 +211,7 @@ log.info "========================================="
      publishDir "${outdir}", mode: 'copy'
 
      input:
-     file "queryLca.tsv" from analysis
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
 
      output:
      file "taxonomy.krona.html"
@@ -233,7 +233,7 @@ log.info "========================================="
      publishDir "${outdir}", mode: 'copy'
 
      input:
-     file "queryLca.tsv" from analysis2
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
 
      output:
      file "phylotree.pdf"
