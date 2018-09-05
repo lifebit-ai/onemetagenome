@@ -248,9 +248,9 @@ log.info "========================================="
   }
 
   /*
-   * STEP 7 - Generating a html table from the csv file
+   * STEP 7 - Generating the final html output file including a table
    */
-  process table {
+  process output {
      container 'lifebitai/csv2html:latest'
      publishDir "${outdir}", mode: 'copy'
 
@@ -259,37 +259,13 @@ log.info "========================================="
 
      output:
      file "queryLca.html"
+     file "output.html"
 
      script:
      """
      cat queryLca.tsv | tr "\\t" "," > queryLca.csv
      csvtotable queryLca.csv queryLca.html
+     cp /data/output.html .
      """
 
   }
-
-  /*
-   * STEP 8 - Generating an output html file from the output from the previous processes
-
-  process output {
-     publishDir "${outdir}", mode: 'copy'
-
-     input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
-
-     output:
-     file "output.html"
-     //file "Rplots.png"
-
-     script:
-     """
-     echo "
-     <html>
-     <body>
-       <p>Hello, world!</p>
-     </body>
-     </html>" > output.html
-     """
-
-  }
-*/
