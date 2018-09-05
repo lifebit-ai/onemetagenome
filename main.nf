@@ -204,36 +204,72 @@ log.info "========================================="
   }
 
   /*
-   * STEP 5 - Generating a HTML5 Krona chart from the first two columns of queryLca.tsv
+   * STEP 5 - Generating the EC numbers, table and final output file
    */
-  process chart {
-     container 'stevetsa/krona:latest'
+  process output {
+     container 'lifebitai/csv2html:latest'
      publishDir "${outdir}", mode: 'copy'
 
      input:
      set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
 
      output:
-     file "taxonomy.krona.html"
+     file "ec2protein.tsv" into ec2protein
+     file "queryLca.html"
+     file "output.html"
 
      script:
      """
-     awk '{print \$1,"\\t",\$2}' queryLca.tsv > krona_queryLca.tsv
-     /KronaTools-2.7/updateTaxonomy.sh
-     ktImportTaxonomy krona_queryLca.tsv
-     """
+     cp /data/Neo_Gene_EC_Map.py .
+     cp /data/swiss_map.tsv .
+     #get EC numbers
+     python2 Neo_Gene_EC_Map.py swiss_map.tsv queryLcaProt.tsv ec2protein.tsv
 
+     #make table
+     cat queryLca.tsv | tr "\\t" "," > queryLca.csv
+     csvtotable queryLca.csv queryLca.html
+
+     #get output
+     cp /data/output.html .
+     """
   }
 
   /*
-   * STEP 6 - Generating a phylogenetic tree using the R package taxize
+   * STEP 6 - Generating Krona charts for taxonic and functional abundance
+   */
+  process chart {
+     container 'lifebitai/onemetagenome_krona:latest'
+     publishDir "${outdir}", mode: 'copy'
+
+     input:
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
+     file "ec2protein.tsv" from ec2protein
+
+     output:
+     file "taxonomy.krona.html"
+     file "ec.krona.html"
+
+     script:
+     """
+     #taxonic abundance
+     awk '{print \$1,"\\t",\$2}' queryLca.tsv > krona_queryLca.tsv
+     ktImportTaxonomy krona_queryLca.tsv
+
+     #functional abundance
+     sed -i -e '159,163d;' /KronaTools-2.7/scripts/ImportEC.pl
+     ktImportEC ec2protein.tsv
+     """
+  }
+
+  /*
+   * STEP 7 - Generating a phylogenetic tree using the R package taxize
    */
   process phylotree {
      container 'lifebitai/onemetagenome_phylotree:latest'
      publishDir "${outdir}", mode: 'copy'
 
      input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
 
      output:
      file "phylotree.pdf"
@@ -244,28 +280,4 @@ log.info "========================================="
      echo "ENTREZ_KEY='01f380df4cbfe85683d3ce7d1716648b3d09'" > .Renviron
      Rscript /data/rscripts/docker_onemetagenome_phylotree.r
      """
-
-  }
-
-  /*
-   * STEP 7 - Generating the final html output file including a table
-   */
-  process output {
-     container 'lifebitai/csv2html:latest'
-     publishDir "${outdir}", mode: 'copy'
-
-     input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
-
-     output:
-     file "queryLca.html"
-     file "output.html"
-
-     script:
-     """
-     cat queryLca.tsv | tr "\\t" "," > queryLca.csv
-     csvtotable queryLca.csv queryLca.html
-     cp /data/output.html .
-     """
-
   }
