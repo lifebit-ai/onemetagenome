@@ -1,23 +1,4 @@
 <!DOCTYPE html>
-<!--
-  ~ Copyright (c) 2013-2018, Centre for Genomic Regulation (CRG).
-  ~ Copyright (c) 2013-2018, Paolo Di Tommaso and the respective authors.
-  ~
-  ~   This file is part of 'Nextflow'.
-  ~
-  ~   Nextflow is free software: you can redistribute it and/or modify
-  ~   it under the terms of the GNU General Public License as published by
-  ~   the Free Software Foundation, either version 3 of the License, or
-  ~   (at your option) any later version.
-  ~
-  ~   Nextflow is distributed in the hope that it will be useful,
-  ~   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~   GNU General Public License for more details.
-  ~
-  ~   You should have received a copy of the GNU General Public License
-  ~   along with Nextflow.  If not, see <http://www.gnu.org/licenses/>.
-  -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -51,7 +32,7 @@
  *   DataTables 1.10.16, Buttons 1.4.2, Column visibility 1.4.2, HTML5 export 1.4.2, ColReorder 1.4.1
  */
 
-/* Nextflow Report Custom CSS */
+/* Custom CSS */
 body {
   padding-top: 56px;
 }
@@ -139,77 +120,6 @@ footer a {
   <div class="container">
 
     <h1 class="display-3">Metagenomic Results</h1>
-    <!--
-    <h2 class="text-muted mb-4"><samp>[fervent_albattani]</samp> </h2>
-
-
-        <div class="alert alert-success mb-4">
-            Workflow execution completed successfully!
-        </div>
-
-
-    <dl>
-      <dt>Run times</dt>
-      <dd>
-        <span id="workflow_start">Wed Sep 05 09:16:37 BST 2018</span> - <span id="workflow_complete">Wed Sep 05 09:26:03 BST 2018</span>
-        (<span id="completed_fromnow"></span>duration: <strong>9m 26s</strong>)
-      </dd>
-
-      <dl>
-        <div class="progress" style="height: 1.6rem; margin: 1.2rem auto; border-radius: 0.20rem;">
-          <div style="width: 100.0%" class="progress-bar bg-success" data-toggle="tooltip" data-placement="top" title="3 tasks succeeded"><span class="text-truncate">&nbsp; 3 succeeded &nbsp;</span></div>
-          <div style="width: 0.0%" class="progress-bar bg-secondary" data-toggle="tooltip" data-placement="top" title="0 tasks were cached"><span class="text-truncate">&nbsp; 0 cached &nbsp;</span></div>
-          <div style="width: 0.0%" class="progress-bar bg-warning" data-toggle="tooltip" data-placement="top" title="0 tasks reported and error and were ignored"><span class="text-truncate">&nbsp; 0 ignored &nbsp;</span></div>
-          <div style="width: 0.0%" class="progress-bar bg-danger" data-toggle="tooltip" data-placement="top" title="0 tasks failed"><span class="text-truncate">&nbsp; 0 failed &nbsp;</span></div>
-        </div>
-      </dl>
-
-      <dt>Nextflow command</dt>
-      <dd><pre class="nfcommand"><code>nextflow run main.nf -with-docker hadrieng/mag:0.1.0 --reads_folder s3://lifebit-featured-datasets/pipelines/yamp-data</code></pre></dd>
-    </dl>
-
-    <dl class="row small">
-      <dt class="col-sm-3">CPU-Hours</dt>
-      <dd class="col-sm-9"><samp>0.1</samp></dd>
-
-      <dt class="col-sm-3">Launch directory</dt>
-      <dd class="col-sm-9"><samp>/Users/phil/Documents/GitHub/mag</samp></dd>
-
-      <dt class="col-sm-3">Work directory</dt>
-      <dd class="col-sm-9"><samp>/Users/phil/Documents/GitHub/mag/work</samp></dd>
-
-      <dt class="col-sm-3">Project directory</dt>
-      <dd class="col-sm-9"><samp>/Users/phil/Documents/GitHub/mag</samp></dd>
-
-
-        <dt class="col-sm-3">Script name</dt>
-        <dd class="col-sm-9"><samp>main.nf</samp></dd>
-
-
-
-        <dt class="col-sm-3">Script ID</dt>
-        <dd class="col-sm-9"><code>5b497487df029803a0528de0a261d9ee</code></dd>
-
-
-      <dt class="col-sm-3">Workflow session</dt>
-      <dd class="col-sm-9"><code>b8ff0282-5d93-44a1-b76a-d59b1baf003c</code></dd>
-
-
-
-      <dt class="col-sm-3">Workflow profile</dt>
-      <dd class="col-sm-9">standard</dd>
-
-
-      <dt class="col-sm-3">Workflow container</dt>
-      <dd class="col-sm-9"><samp>hadrieng/mag:0.1.0</samp></dd>
-
-      <dt class="col-sm-3">Container engine</dt>
-      <dd class="col-sm-9"><samp>docker</samp></dd>
-
-
-      <dt class="col-sm-3">Nextflow version</dt>
-      <dd class="col-sm-9">version 0.31.0, build 4885 (25-07-2018 14:10 UTC)</dd>
-    </dl>-->
   </div>
 </div>
 
@@ -219,114 +129,23 @@ footer a {
   <p>These plots give an overview of the distribution of taxonomic groups, functional abundance of enzymes and the evolutionary history between the different organisms.</p>
 
   <h4>Taxonomic Abundance</h4>
-  <!--<ul class="nav nav-tabs" id="cpuplot_tabs" role="tablist">
-    <li class="nav-item">
-      <a class="nav-link active" id="cpuplot_tablink" data-toggle="tab" href="#cpuplot_tabpanel" role="tab" aria-controls="pctcpuplot_tabpanel" aria-expanded="false">
-        Raw Usage
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" id="pctcpuplot_tablink" data-toggle="tab" href="#pctcpuplot_tabpanel" role="tab" aria-controls="cpuplot_tabpanel" aria-expanded="true">
-        % Allocated
-      </a>
-    </li>
-  </ul>
-  <div class="tab-content" id="cpuplot_tabcontent">
-    <div class="tab-pane fade show active" id="cpuplot_tabpanel" role="tabpanel">
-      <div id="cpuplot"></div>
-    </div>
-    <div class="tab-pane fade" id="pctcpuplot_tabpanel" role="tabpanel">
-      <div id="pctcpuplot"></div>
-    </div>
-  </div>-->
   <iframe width="1000" height="1000" src="taxonomy.krona.html"></iframe>
 
   <h4>Functional abundance</h4>
-  <!--<ul class="nav nav-tabs" id="memplot_tabs" role="tablist">
-    <li class="nav-item">
-      <a class="nav-link active" id="memplotlot_tablink" data-toggle="tab" href="#memplotlot_tabpanel" role="tab" aria-controls="memplotlot_tabpanel" aria-expanded="false">
-        Raw Usage
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" id="pctmemplot_tablink" data-toggle="tab" href="#pctmemplot_tabpanel" role="tab" aria-controls="pctmemplot_tabpanel" aria-expanded="true">
-        % Allocated
-      </a>
-    </li>
-  </ul>
-  <div class="tab-content" id="memplot_tabcontent">
-    <div class="tab-pane fade show active" id="memplotlot_tabpanel" role="tabpanel">
-      <div id="memplot"></div>
-    </div>
-    <div class="tab-pane fade" id="pctmemplot_tabpanel" role="tabpanel">
-      <div id="pctmemplot"></div>
-    </div>
-  </div>-->
   <iframe width="1000" height="1000" src="ec.krona.html"></iframe>
 
   <h4 id="timeplot_header">Phylogeentic Tree</h4>
-  <!--<ul class="nav nav-tabs" id="timeplot_tabs" role="tablist">
-    <li class="nav-item">
-      <a class="nav-link active" id="timeplot_tablink" data-toggle="tab" href="#timeplot_tabpanel" role="tab" aria-controls="timeplot_tabpanel" aria-expanded="false">
-        Raw Usage
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" id="pcttimeplot_tablink" data-toggle="tab" href="#pcttimeplot_tabpanel" role="tab" aria-controls="pcttimeplot_tabpanel" aria-expanded="true">
-        % Allocated
-      </a>
-    </li>
-  </ul>
-  <div class="tab-content" id="timeplot_tabcontent">
-    <div class="tab-pane fade show active" id="timeplot_tabpanel" role="tabpanel">
-      <div id="timeplot"></div>
-    </div>
-    <div class="tab-pane fade" id="pcttimeplot_tabpanel" role="tabpanel">
-      <div id="pcttimeplot"></div>
-    </div>
-  </div>-->
   <img width="500" height="500" src="phylotree.png"></img>
 
-  <!--<h4 id="readwriteplot_header">Disk I/O</h4>
-  <ul class="nav nav-tabs" id="readwriteplot_tabs" role="tablist">
-    <li class="nav-item">
-      <a class="nav-link active" id="readplot_tablink" data-toggle="tab" href="#readplot_tabpanel" role="tab" aria-controls="readplot_tabpanel" aria-expanded="true">
-        Read
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" id="writeplot_tablink" data-toggle="tab" href="#writeplot_tabpanel" role="tab" aria-controls="writeplot_tabpanel" aria-expanded="false">
-        Write
-      </a>
-    </li>
-  </ul>
-  <div class="tab-content" id="readwriteplot_tabcontent">
-    <div class="tab-pane fade show active" id="readplot_tabpanel" role="tabpanel">
-      <div id="readplot"></div>
-    </div>
-    <div class="tab-pane fade" id="writeplot_tabpanel" role="tabpanel">
-      <div id="writeplot"></div>
-    </div>
-  </div>-->
 
   <div id="table-container">
   <h2 id="tasks" style="padding-top: 80px;">Table</h2>
   <p>This table shows information about each of the reads used in the pipeline. This includes the fastq name, ncbi number, taxanomic rank and organism name.</p>
-  <!--<form class="form-inline" id="nf-form-humanreadable">
-    <label class="mr-sm-2" for="nf-table-humanreadable">Values shown as:</label>
-    <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="nf-table-humanreadable">
-      <option value="true">Human readable</option>
-      <option value="false">Raw values</option>
-    </select>
-  </form>-->
 </div>
 <div class="container-fluid">
   <table class="table small table-striped" id="tasks_table"></table>
 </div>
 </div>
-<!--<div id="no-table-container" class="container">
-  (tasks table omitted because the dataset is too big)
-</div>-->
 <iframe width="100%" height="1000" src="queryLca.html"></iframe>
 <footer>
   <div class="container-fluid">
