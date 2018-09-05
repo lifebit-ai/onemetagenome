@@ -188,7 +188,7 @@ log.info "========================================="
       file taxdump from taxdump
 
       output:
-      set file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis, analysis2
+      set file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis, analysis2, analysis3
 
       script:
       """
@@ -237,7 +237,7 @@ log.info "========================================="
 
      output:
      file "phylotree.pdf"
-     //file "Rplots.png"
+     file "phylotree.png"
 
      script:
      """
@@ -246,3 +246,50 @@ log.info "========================================="
      """
 
   }
+
+  /*
+   * STEP 7 - Generating a html table from the csv file
+   */
+  process table {
+     container 'lifebitai/csv2html:latest'
+     publishDir "${outdir}", mode: 'copy'
+
+     input:
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
+
+     output:
+     file "queryLca.html"
+
+     script:
+     """
+     cat queryLca.tsv | tr "\\t" "," > queryLca.csv
+     csvtotable queryLca.csv queryLca.html
+     """
+
+  }
+
+  /*
+   * STEP 8 - Generating an output html file from the output from the previous processes
+
+  process output {
+     publishDir "${outdir}", mode: 'copy'
+
+     input:
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
+
+     output:
+     file "output.html"
+     //file "Rplots.png"
+
+     script:
+     """
+     echo "
+     <html>
+     <body>
+       <p>Hello, world!</p>
+     </body>
+     </html>" > output.html
+     """
+
+  }
+*/
