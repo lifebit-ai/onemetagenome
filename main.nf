@@ -226,6 +226,8 @@ log.info "========================================="
      python2 Neo_Gene_EC_Map.py swiss_map.tsv queryLcaProt.tsv ec2protein.tsv
 
      #make table
+     mv queryLca.tsv no_header.tsv
+     { echo -e "Query Accession\tLCA NCBI Taxon ID\tLCA Rank Name\tLCA Scientific Name"; cat no_header.tsv; } > queryLca.tsv
      cat queryLca.tsv | tr "\\t" "," > queryLca.csv
      csvtotable queryLca.csv queryLca.html
 
