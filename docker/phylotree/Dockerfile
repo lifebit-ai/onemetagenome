@@ -16,10 +16,10 @@ RUN Rscript -e "install.packages('taxize')"
 RUN mkdir /data && \
 	mkdir /data/rscripts/
 
-COPY ./docker_onemetagenome_phylotree.r /data/rscripts/
+COPY ./*.r /data/rscripts/
 
 WORKDIR /data/rscripts/
 
-ENTRYPOINT ["Rscript", "/data/rscripts/docker_onemetagenome_phylotree.r"]
+# ENTRYPOINT ["Rscript", "/data/rscripts/docker_onemetagenome_phylotree.r"]
 
 # CMD ["-h"]

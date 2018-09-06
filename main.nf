@@ -204,16 +204,47 @@ log.info "========================================="
   }
 
   /*
-   * STEP 5 - Generating the EC numbers, table and final output file
+   * STEP 5 - Generating a phylogenetic tree using the R package taxize
    */
-  process output {
-     container 'lifebitai/csv2html:latest'
-     publishDir "${outdir}/tmp/post_taxonomy", pattern: 'ec2protein.tsv'
-     publishDir "${outdir}/dont_delete_me", pattern: 'queryLca.html'
-     publishDir "${outdir}", pattern: 'output.html'
+  process phylotree {
+     container 'lifebitai/onemetagenome_phylotree:latest'
+     publishDir "${outdir}/dont_delete_me", mode: 'copy'
+     publishDir "${outdir}/tmp/post_taxonomy", pattern: 'table.csv', mode: 'copy'
 
      input:
      set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
+
+     output:
+     file "phylotree.jpeg"
+     file "table.csv" into table
+     //file "phylotree.pdf"
+     //file "phylotree.png"
+
+     script:
+     """
+     echo "ENTREZ_KEY='01f380df4cbfe85683d3ce7d1716648b3d09'" > .Renviron
+     Rscript /data/rscripts/docker_onemetagenome_phylotree.r
+
+     #make table
+     mv queryLca.tsv no_header.tsv
+     { echo -e "Query Accession\tLCA NCBI Taxon ID\tLCA Rank Name\tLCA Scientific Name"; cat no_header.tsv; } > queryLca.tsv
+     cat queryLca.tsv | tr "\\t" "," > queryLca.csv
+     Rscript /data/rscripts/table.r
+     """
+  }
+
+  /*
+   * STEP 6 - Generating the EC numbers, table and final output file
+   */
+  process output {
+     container 'lifebitai/csv2html:latest'
+     publishDir "${outdir}/tmp/post_taxonomy", pattern: 'ec2protein.tsv', mode: 'copy'
+     publishDir "${outdir}/dont_delete_me", pattern: 'queryLca.html', mode: 'copy'
+     publishDir "${outdir}", pattern: 'output.html', mode: 'copy'
+
+     input:
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
+     file "table.csv" from table
 
      output:
      file "ec2protein.tsv" into ec2protein
@@ -228,9 +259,7 @@ log.info "========================================="
      python2 Neo_Gene_EC_Map.py swiss_map.tsv queryLcaProt.tsv ec2protein.tsv
 
      #make table
-     mv queryLca.tsv no_header.tsv
-     { echo -e "Query Accession\tLCA NCBI Taxon ID\tLCA Rank Name\tLCA Scientific Name"; cat no_header.tsv; } > queryLca.tsv
-     cat queryLca.tsv | tr "\\t" "," > queryLca.csv
+     mv table.csv queryLca.csv
      csvtotable queryLca.csv queryLca.html
 
      #get output
@@ -239,14 +268,14 @@ log.info "========================================="
   }
 
   /*
-   * STEP 6 - Generating Krona charts for taxonic and functional abundance
+   * STEP 7 - Generating Krona charts for taxonic and functional abundance
    */
   process chart {
      container 'lifebitai/onemetagenome_krona:latest'
      publishDir "${outdir}/dont_delete_me", mode: 'copy'
 
      input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
+     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
      file "ec2protein.tsv" from ec2protein
 
      output:
@@ -262,27 +291,5 @@ log.info "========================================="
      #functional abundance
      sed -i -e '159,163d;' /KronaTools-2.7/scripts/ImportEC.pl
      ktImportEC ec2protein.tsv
-     """
-  }
-
-  /*
-   * STEP 7 - Generating a phylogenetic tree using the R package taxize
-   */
-  process phylotree {
-     container 'lifebitai/onemetagenome_phylotree:latest'
-     publishDir "${outdir}/dont_delete_me", mode: 'copy'
-
-     input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
-
-     output:
-     file "phylotree.jpeg"
-     //file "phylotree.pdf"
-     //file "phylotree.png"
-
-     script:
-     """
-     echo "ENTREZ_KEY='01f380df4cbfe85683d3ce7d1716648b3d09'" > .Renviron
-     Rscript /data/rscripts/docker_onemetagenome_phylotree.r
      """
   }
