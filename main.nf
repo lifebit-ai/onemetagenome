@@ -208,7 +208,9 @@ log.info "========================================="
    */
   process output {
      container 'lifebitai/csv2html:latest'
-     publishDir "${outdir}", mode: 'copy'
+     publishDir "${outdir}/tmp/post_taxonomy", pattern: 'ec2protein.tsv'
+     publishDir "${outdir}/dont_delete_me", pattern: 'queryLca.html'
+     publishDir "${outdir}", pattern: 'output.html'
 
      input:
      set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
@@ -241,7 +243,7 @@ log.info "========================================="
    */
   process chart {
      container 'lifebitai/onemetagenome_krona:latest'
-     publishDir "${outdir}", mode: 'copy'
+     publishDir "${outdir}/dont_delete_me", mode: 'copy'
 
      input:
      set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
@@ -268,7 +270,7 @@ log.info "========================================="
    */
   process phylotree {
      container 'lifebitai/onemetagenome_phylotree:latest'
-     publishDir "${outdir}", mode: 'copy'
+     publishDir "${outdir}/dont_delete_me", mode: 'copy'
 
      input:
      set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
