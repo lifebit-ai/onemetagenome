@@ -274,8 +274,9 @@ log.info "========================================="
      set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
 
      output:
-     file "phylotree.pdf"
-     file "phylotree.png"
+     file "phylotree.jpeg"
+     //file "phylotree.pdf"
+     //file "phylotree.png"
 
      script:
      """
