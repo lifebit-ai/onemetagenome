@@ -15,7 +15,10 @@ colnames(reads_number)[1] <- "LCA.NCBI.Taxon.ID"
 
 combined <- merge(unique_species,reads_number,by="LCA.NCBI.Taxon.ID")
 
-Percentage.of.Reads <- combined$freq/sum(combined$freq) * 100
+total_reads_number <- read.table("reads_number.txt", quote="\"", comment.char="")
+total_reads_number <- total_reads_number[[1]][1]
+
+Percentage.of.Reads <- combined$freq/total_reads_number * 100
 
 combined <- cbind(combined, Percentage.of.Reads)
 

@@ -140,7 +140,7 @@ log.info "========================================="
  }
 
  /*
-  * STEP 3 - Using uniprot data to generate targetDB.tsv for taxonomy (STEP 5)
+  * STEP 3 - Using uniprot data to generate targetDB.tsv for taxonomy (STEP 4)
   */
   process pre_taxonomy {
       container 'soedinglab/mmseqs2:latest'
@@ -188,10 +188,12 @@ log.info "========================================="
       file taxdump from taxdump
 
       output:
-      set file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis, analysis2, analysis3
+      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis, analysis2, analysis3
 
       script:
       """
+      #reads_number="\$(wc -l queryDB.index | awk '{print \$1}')"
+      wc -l queryDB.index | awk '{print \$1}' > reads_number.txt
       #doing a big taxdump
       mkdir ncbi-taxdump && mv taxdump.tar.gz ncbi-taxdump && cd ncbi-taxdump
       tar xzvf taxdump.tar.gz
@@ -212,7 +214,7 @@ log.info "========================================="
      publishDir "${outdir}/tmp/post_taxonomy", pattern: 'table.csv', mode: 'copy'
 
      input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
+     set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
 
      output:
      file "phylotree.jpeg"
@@ -222,6 +224,7 @@ log.info "========================================="
 
      script:
      """
+     #make phylotree
      echo "ENTREZ_KEY='01f380df4cbfe85683d3ce7d1716648b3d09'" > .Renviron
      Rscript /data/rscripts/docker_onemetagenome_phylotree.r
 
@@ -243,7 +246,7 @@ log.info "========================================="
      publishDir "${outdir}", pattern: 'output.html', mode: 'copy'
 
      input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
+     set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
      file "table.csv" from table
 
      output:
@@ -275,7 +278,7 @@ log.info "========================================="
      publishDir "${outdir}/dont_delete_me", mode: 'copy'
 
      input:
-     set file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
+     set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
      file "ec2protein.tsv" from ec2protein
 
      output:
