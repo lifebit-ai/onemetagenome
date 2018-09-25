@@ -179,7 +179,7 @@ log.info "========================================="
    */
   process taxonomy {
       container 'soedinglab/mmseqs2:latest'
-      publishDir "${outdir}/tmp/taxonomy", mode: 'copy'
+      publishDir "${outdir}", mode: 'copy'
 
       input:
       file "*" from queryDB
@@ -207,7 +207,7 @@ log.info "========================================="
 
   /*
    * STEP 5 - Generating a phylogenetic tree using the R package taxize
-   */
+
   process phylotree {
      container 'lifebitai/onemetagenome_phylotree:latest'
      publishDir "${outdir}/dont_delete_me", mode: 'copy'
@@ -238,7 +238,7 @@ log.info "========================================="
 
   /*
    * STEP 6 - Generating the EC numbers, table and final output file
-   */
+
   process output {
      container 'lifebitai/csv2html:latest'
      publishDir "${outdir}/tmp/post_taxonomy", pattern: 'ec2protein.tsv', mode: 'copy'
@@ -272,7 +272,7 @@ log.info "========================================="
 
   /*
    * STEP 7 - Generating Krona charts for taxonic and functional abundance
-   */
+
   process chart {
      container 'lifebitai/onemetagenome_krona:latest'
      publishDir "${outdir}/dont_delete_me", mode: 'copy'
@@ -296,4 +296,4 @@ log.info "========================================="
      ktImportEC ec2protein.tsv
      """
   }
-
+   */
