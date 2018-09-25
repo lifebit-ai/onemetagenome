@@ -48,10 +48,17 @@ def helpMessage() {
  */
 params.reads_folder = "s3://lifebit-featured-datasets/containers/plass"
 params.reads_extension = "fastq"
-reads_path="${params.reads_folder}/*{1,2}.${params.reads_extension}"
+if (params.singleEnd) {
+      reads_path="${params.reads_folder}/*.${params.reads_extension}"
+  } else {
+      reads_path="${params.reads_folder}/*{1,2}.${params.reads_extension}"
+}
 
-params.fas = "s3://lifebit-featured-datasets/containers/mmseqs2/DB.fasta"
-fas = file(params.fas)
+//params.fas = "s3://lifebit-featured-datasets/containers/mmseqs2/DB.fasta"
+//fas = file(params.fas)
+
+params.targetdb_folder = "s3://lifebit-featured-datasets/pipelines/onemetagenome-data/targetDB"
+targetdb_folder = params.targetdb_folder
 
 params.uniprot = "s3://lifebit-featured-datasets/pipelines/onemetagenome-data/uniprot_sprot.dat.gz"
 uniprot = file(params.uniprot)
@@ -72,9 +79,20 @@ if (params.help){
  * Create a channel for input read files
  */
  Channel
-         .fromFilePairs( reads_path, size: 2 )
-         .ifEmpty { exit 1, "Cannot find any reads matching: ${reads_path}\nNB: Please specify the folder and extension of the read files\nEg: --reads_folder reads --reads_extension fastq"}
-         .set { reads }
+       .fromFilePairs( reads_path, size: params.singleEnd ? 1 : 2 )
+       .ifEmpty { exit 1, "Cannot find any reads matching: ${reads_path}\nNB: Please specify the folder and extension of the read files\nEg: --reads_folder reads --reads_extension fastq"}
+       .set { reads }
+
+
+ /*
+  * targetDB files
+  */
+targetdb = file("${targetdb_folder}/targetDB")
+targetdb_type = file("${targetdb_folder}/targetDB.dbtype")
+targetdb_index = file("${targetdb_folder}/targetDB.index")
+targetdb_lookup = file("${targetdb_folder}/targetDB.lookup")
+targetdb_h = file("${targetdb_folder}/targetDB_h")
+targetdb_h_index = file("${targetdb_folder}/targetDB_h.index")
 
 
 // Header log info
@@ -92,7 +110,8 @@ summary['Pipeline Name']    = 'PhilPalmer/onemetagenome'
 //summary['Reads folder']     = params.reads_folder
 //summary['Reads extension']  = params.reads_extension
 summary['Reads']            = reads_path
-summary['Fasta database']   = params.fas
+//summary['Fasta database']   = params.fas
+summary['TargetDB directory'] = targetdb_folder
 summary['Uniprot database'] = params.uniprot
 summary['Taxdump']          = params.taxdump
 summary['Output directory'] = params.outdir
@@ -122,7 +141,7 @@ log.info "========================================="
 
  /*
   * STEP 2 - Convert target database into mmseqs database format
-  */
+
  process convertdb_target {
      container 'soedinglab/mmseqs2:latest'
      publishDir "${outdir}/tmp/createdb/target", mode: 'copy'
@@ -138,6 +157,7 @@ log.info "========================================="
      mmseqs createdb $fas targetDB
      """
  }
+ */
 
  /*
   * STEP 3 - Using uniprot data to generate targetDB.tsv for taxonomy (STEP 4)
@@ -148,7 +168,12 @@ log.info "========================================="
 
       input:
       file uniprot
-      file "*" from targetDB
+      file targetdb
+      file targetdb_type
+      file targetdb_index
+      file targetdb_lookup
+      file targetdb_h
+      file targetdb_h_index
 
       output:
       file "targetDB.tsv" into tsv
@@ -183,9 +208,14 @@ log.info "========================================="
 
       input:
       file "*" from queryDB
-      file "*" from targetDB2
       file "targetDB.tsv" from tsv
       file taxdump from taxdump
+      file targetdb
+      file targetdb_type
+      file targetdb_index
+      file targetdb_lookup
+      file targetdb_h
+      file targetdb_h_index
 
       output:
       set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis, analysis2, analysis3
@@ -212,6 +242,9 @@ log.info "========================================="
      container 'lifebitai/onemetagenome_phylotree:latest'
      publishDir "${outdir}/dont_delete_me", mode: 'copy'
      publishDir "${outdir}/tmp/post_taxonomy", pattern: 'table.csv', mode: 'copy'
+
+     when:
+     params.benchmark
 
      input:
      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
@@ -245,6 +278,9 @@ log.info "========================================="
      publishDir "${outdir}/dont_delete_me", pattern: 'queryLca.html', mode: 'copy'
      publishDir "${outdir}", pattern: 'output.html', mode: 'copy'
 
+     when:
+     params.benchmark
+
      input:
      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
      file "table.csv" from table
@@ -277,6 +313,9 @@ log.info "========================================="
      container 'lifebitai/onemetagenome_krona:latest'
      publishDir "${outdir}/dont_delete_me", mode: 'copy'
 
+     when:
+     params.benchmark
+
      input:
      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
      file "ec2protein.tsv" from ec2protein
@@ -296,4 +335,3 @@ log.info "========================================="
      ktImportEC ec2protein.tsv
      """
   }
-
