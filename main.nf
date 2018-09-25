@@ -48,8 +48,11 @@ def helpMessage() {
  */
 params.reads_folder = "s3://lifebit-featured-datasets/containers/plass"
 params.reads_extension = "fastq"
-reads_path="${params.reads_folder}/*{1,2}.${params.reads_extension}"
-
+if (params.singleEnd) {
+      reads_path="${params.reads_folder}/*.${params.reads_extension}"
+  } else {
+      reads_path="${params.reads_folder}/*{1,2}.${params.reads_extension}"
+}
 params.fas = "s3://lifebit-featured-datasets/containers/mmseqs2/DB.fasta"
 fas = file(params.fas)
 
@@ -70,11 +73,24 @@ if (params.help){
 
 /*
  * Create a channel for input read files
- */
- Channel
-         .fromFilePairs( reads_path, size: 2 )
-         .ifEmpty { exit 1, "Cannot find any reads matching: ${reads_path}\nNB: Please specify the folder and extension of the read files\nEg: --reads_folder reads --reads_extension fastq"}
-         .set { reads }
+
+ if(params.singleEnd){
+        Channel
+            .fromPath( reads_path )
+            .map { row -> [ row[0], [file(row[1][0])]] }
+            .set { reads }
+    } else {
+      Channel
+            .fromFilePairs( reads_path, size: 2 )
+            .ifEmpty { exit 1, "Cannot find any reads matching: ${reads_path}\nNB: Please specify the folder and extension of the read files\nEg: --reads_folder reads --reads_extension fastq"}
+            .set { reads }
+    }*/
+Channel
+      .fromFilePairs( reads_path, size: params.singleEnd ? 1 : 2 )
+      .ifEmpty { exit 1, "Cannot find any reads matching: ${reads_path}\nNB: Please specify the folder and extension of the read files\nEg: --reads_folder reads --reads_extension fastq"}
+      .set { reads }
+
+
 
 
 // Header log info
@@ -179,7 +195,7 @@ log.info "========================================="
    */
   process taxonomy {
       container 'soedinglab/mmseqs2:latest'
-      publishDir "${outdir}/tmp/taxonomy", mode: 'copy'
+      publishDir "${outdir}/taxonomy", mode: 'copy'
 
       input:
       file "*" from queryDB
@@ -188,7 +204,7 @@ log.info "========================================="
       file taxdump from taxdump
 
       output:
-      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis, analysis2, analysis3
+      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") into analysis
 
       script:
       """
