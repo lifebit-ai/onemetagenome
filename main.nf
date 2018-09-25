@@ -69,6 +69,8 @@ taxdump = file(params.taxdump)
 params.outdir = "results"
 outdir = "${params.outdir}"
 
+params.benchmark = true
+
 // Show help emssage
 if (params.help){
     helpMessage()
@@ -244,7 +246,7 @@ log.info "========================================="
      publishDir "${outdir}/tmp/post_taxonomy", pattern: 'table.csv', mode: 'copy'
 
      when:
-     params.benchmark
+     params.benchmark == false
 
      input:
      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis
@@ -279,7 +281,7 @@ log.info "========================================="
      publishDir "${outdir}", pattern: 'output.html', mode: 'copy'
 
      when:
-     params.benchmark
+     params.benchmark == false
 
      input:
      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis2
@@ -314,7 +316,7 @@ log.info "========================================="
      publishDir "${outdir}/dont_delete_me", mode: 'copy'
 
      when:
-     params.benchmark
+     params.benchmark == false
 
      input:
      set file("reads_number.txt"), file("queryLca.tsv"), file("queryLcaProt.tsv") from analysis3
